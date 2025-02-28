@@ -60,9 +60,22 @@ func (w *Writer) Err() error {
 	return err
 }
 
-// AverageDuration returns the average time taken per Write operation.
+// AverageByteDuration returns the average time taken per byte written.
+// Returns 0 if no bytes have been written.
+func (w *Writer) AverageByteDuration() time.Duration {
+	w.lock.RLock()
+	defer w.lock.RUnlock()
+
+	if w.n == 0 {
+		return 0
+	}
+
+	return w.totalDuration / time.Duration(w.n)
+}
+
+// AverageOperationDuration returns the average time taken per write operation.
 // Returns 0 if no writes have been performed.
-func (w *Writer) AverageDuration() time.Duration {
+func (w *Writer) AverageOperationDuration() time.Duration {
 	w.lock.RLock()
 	defer w.lock.RUnlock()
 
@@ -70,5 +83,14 @@ func (w *Writer) AverageDuration() time.Duration {
 		return 0
 	}
 
-	return time.Duration(w.totalDuration.Nanoseconds() / w.writeCount)
+	return w.totalDuration / time.Duration(w.writeCount)
+}
+
+// Stats returns both the total duration and the number of bytes written.
+// This allows retrieving both values atomically with a single lock acquisition.
+func (w *Writer) Stats() (time.Duration, int64, int64) {
+	w.lock.RLock()
+	defer w.lock.RUnlock()
+
+	return w.totalDuration, w.writeCount, w.n
 }

@@ -36,7 +36,8 @@ func writerExample() {
 
 	// Get average duration
 	fmt.Printf("Total bytes written: %d\n", w.N())
-	fmt.Printf("Average write duration: %v\n", w.AverageDuration())
+	fmt.Printf("Average byte write duration: %v\n", w.AverageByteDuration())
+	fmt.Printf("Average operation duration: %v\n", w.AverageOperationDuration())
 }
 
 func readerExample() {
@@ -71,5 +72,6 @@ func readerExample() {
 	// Get average duration
 	fmt.Printf("Total bytes read: %d\n", r.N())
 	fmt.Printf("Number of read operations: %d\n", readCount)
-	fmt.Printf("Average read duration: %v\n", r.AverageDuration())
+	fmt.Printf("Average byte read duration: %v\n", r.AverageByteDuration())
+	fmt.Printf("Average operation duration: %v\n", r.AverageOperationDuration())
 }

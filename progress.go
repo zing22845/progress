@@ -46,8 +46,12 @@ type Counter interface {
 // Both Reader and Writer implement TimedCounter.
 type TimedCounter interface {
 	Counter
-	// AverageDuration returns the average time taken per operation.
-	AverageDuration() time.Duration
+	// AverageByteDuration returns the average time taken per byte read or written.
+	AverageByteDuration() time.Duration
+	// AverageOperationDuration returns the average time taken per read or write operation.
+	AverageOperationDuration() time.Duration
+	// Stats returns total duration, read or write count, and bytes read or written in one call.
+	Stats() (time.Duration, int64, int64)
 }
 
 // Progress represents a moment of progress.

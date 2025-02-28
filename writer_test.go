@@ -38,7 +38,7 @@ func TestNewWriter(t *testing.T) {
 	is.Equal(w.N(), int64(5)) // r.N()
 
 	// Test AverageDuration
-	avgDuration := w.AverageDuration()
+	avgDuration := w.AverageByteDuration()
 	is.True(avgDuration >= 0)          // Average duration should be non-negative
 	is.True(avgDuration < time.Second) // Average duration should be reasonable
 }
@@ -51,7 +51,7 @@ func TestWriterAverageDuration(t *testing.T) {
 	w := NewWriter(&buf)
 
 	// Initial average should be 0 when no writes have been performed
-	is.Equal(w.AverageDuration(), time.Duration(0))
+	is.Equal(w.AverageByteDuration(), time.Duration(0))
 
 	// Perform a few writes
 	for i := 0; i < 5; i++ {
@@ -60,7 +60,7 @@ func TestWriterAverageDuration(t *testing.T) {
 	}
 
 	// Average duration should be non-zero after writes
-	avgDuration := w.AverageDuration()
+	avgDuration := w.AverageByteDuration()
 	is.True(avgDuration > 0)
 	is.True(avgDuration < time.Second) // Sanity check for reasonable duration
 }

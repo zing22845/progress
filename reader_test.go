@@ -2,7 +2,6 @@ package progress
 
 import (
 	"io"
-	"io/ioutil"
 	"strings"
 	"testing"
 	"time"
@@ -35,13 +34,13 @@ func TestNewReader(t *testing.T) {
 	is.Equal(r.N(), int64(2)) // r.N()
 
 	// read to the end
-	b, err := ioutil.ReadAll(r)
+	b, err := io.ReadAll(r)
 	is.NoErr(err)
 	is.Equal(len(b), 29)       // len(b)
 	is.Equal(r.N(), int64(31)) // r.N()
 
 	// Test AverageDuration
-	avgDuration := r.AverageDuration()
+	avgDuration := r.AverageByteDuration()
 	is.True(avgDuration >= 0)          // Average duration should be non-negative
 	is.True(avgDuration < time.Second) // Average duration should be reasonable
 }
@@ -52,7 +51,7 @@ func TestReaderAverageDuration(t *testing.T) {
 
 	// No reads performed yet
 	r := NewReader(strings.NewReader("test data"))
-	is.Equal(r.AverageDuration(), time.Duration(0))
+	is.Equal(r.AverageByteDuration(), time.Duration(0))
 
 	// Perform a few reads
 	buf := make([]byte, 2)
@@ -62,7 +61,7 @@ func TestReaderAverageDuration(t *testing.T) {
 	}
 
 	// Average duration should be non-zero after reads
-	avgDuration := r.AverageDuration()
+	avgDuration := r.AverageByteDuration()
 	is.True(avgDuration > 0)
 	is.True(avgDuration < time.Second) // Sanity check for reasonable duration
 }

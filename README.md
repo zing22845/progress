@@ -48,8 +48,17 @@ fmt.Printf("Average read time: %v\n", avgReadTime)
 // Get the average time taken per Write operation
 writer := progress.NewWriter(w)
 // ... perform some writes ...
-avgWriteTime := writer.AverageDuration()
+avgWriteTime := writer.AverageWriteDuration()
 fmt.Printf("Average write time: %v\n", avgWriteTime)
+
+// Get the average time taken per byte written
+avgByteTime := writer.AverageByteDuration()
+fmt.Printf("Average time per byte: %v\n", avgByteTime)
+
+// Get all stats at once (total duration, write count, and bytes written)
+totalDuration, writeCount, bytesWritten := writer.Stats()
+fmt.Printf("Total duration: %v, Write operations: %d, Bytes written: %d\n", 
+           totalDuration, writeCount, bytesWritten)
 ```
 
 The `TimedCounter` interface is implemented by both `Reader` and `Writer`:
@@ -60,6 +69,19 @@ type TimedCounter interface {
 	// AverageDuration returns the average time taken per operation.
 	AverageDuration() time.Duration
 }
+```
+
+The `Writer` provides additional timing methods:
+
+```go
+// AverageByteDuration returns the average time taken per byte written
+AverageByteDuration() time.Duration
+
+// AverageWriteDuration returns the average time taken per write operation
+AverageWriteDuration() time.Duration
+
+// Stats returns total duration, write count, and bytes written in one call
+Stats() (time.Duration, int64, int64)
 ```
 
 See the [timing example](example/timing/main.go) for more details on how to use this feature.

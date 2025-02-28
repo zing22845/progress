@@ -60,9 +60,22 @@ func (r *Reader) Err() error {
 	return err
 }
 
-// AverageDuration returns the average time taken per Read operation.
+// AverageByteDuration returns the average time taken per byte read.
+// Returns 0 if no bytes have been read.
+func (r *Reader) AverageByteDuration() time.Duration {
+	r.lock.RLock()
+	defer r.lock.RUnlock()
+
+	if r.n == 0 {
+		return 0
+	}
+
+	return r.totalDuration / time.Duration(r.n)
+}
+
+// AverageOperationDuration returns the average time taken per read operation.
 // Returns 0 if no reads have been performed.
-func (r *Reader) AverageDuration() time.Duration {
+func (r *Reader) AverageOperationDuration() time.Duration {
 	r.lock.RLock()
 	defer r.lock.RUnlock()
 
@@ -70,5 +83,14 @@ func (r *Reader) AverageDuration() time.Duration {
 		return 0
 	}
 
-	return time.Duration(r.totalDuration.Nanoseconds() / r.readCount)
+	return r.totalDuration / time.Duration(r.readCount)
+}
+
+// Stats returns both the total duration and the number of bytes read.
+// This allows retrieving both values atomically with a single lock acquisition.
+func (r *Reader) Stats() (time.Duration, int64, int64) {
+	r.lock.RLock()
+	defer r.lock.RUnlock()
+
+	return r.totalDuration, r.readCount, r.n
 }
