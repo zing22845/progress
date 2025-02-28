@@ -3,6 +3,7 @@ package progress
 import (
 	"io"
 	"sync"
+	"time"
 )
 
 // Reader counts the bytes read through it.
@@ -12,6 +13,10 @@ type Reader struct {
 	lock sync.RWMutex // protects n and err
 	n    int64
 	err  error
+
+	// Time tracking fields
+	totalDuration time.Duration
+	readCount     int64
 }
 
 // NewReader makes a new Reader that counts the bytes
@@ -23,10 +28,15 @@ func NewReader(r io.Reader) *Reader {
 }
 
 func (r *Reader) Read(p []byte) (n int, err error) {
+	start := time.Now()
 	n, err = r.r.Read(p)
+	duration := time.Since(start)
+
 	r.lock.Lock()
 	r.n += int64(n)
 	r.err = err
+	r.totalDuration += duration
+	r.readCount++
 	r.lock.Unlock()
 	return
 }
@@ -48,4 +58,17 @@ func (r *Reader) Err() error {
 	err = r.err
 	r.lock.RUnlock()
 	return err
+}
+
+// AverageDuration returns the average time taken per Read operation.
+// Returns 0 if no reads have been performed.
+func (r *Reader) AverageDuration() time.Duration {
+	r.lock.RLock()
+	defer r.lock.RUnlock()
+
+	if r.readCount == 0 {
+		return 0
+	}
+
+	return time.Duration(r.totalDuration.Nanoseconds() / r.readCount)
 }

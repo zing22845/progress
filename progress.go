@@ -1,25 +1,26 @@
 // Package progress provides io.Reader and io.Writer with progress and remaining time estimation.
-//  ctx := context.Background()
 //
-//  // get a reader and the total expected number of bytes
-//  s := `Now that's what I call progress`
-//  size := len(s)
-//  r := progress.NewReader(strings.NewReader(s))
+//	ctx := context.Background()
 //
-//  // Start a goroutine printing progress
-//  go func() {
-//      ctx := context.Background()
-//      progressChan := progress.NewTicker(ctx, r, size, 1*time.Second)
-//      for p := range progressChan {
-//      	fmt.Printf("\r%v remaining...", p.Remaining().Round(time.Second))
-//      }
-//      fmt.Println("\rdownload is completed")
-//  }()
+//	// get a reader and the total expected number of bytes
+//	s := `Now that's what I call progress`
+//	size := len(s)
+//	r := progress.NewReader(strings.NewReader(s))
 //
-//  // use the Reader as normal
-//  if _, err := io.Copy(dest, r); err != nil {
-//  	log.Fatalln(err)
-//  }
+//	// Start a goroutine printing progress
+//	go func() {
+//	    ctx := context.Background()
+//	    progressChan := progress.NewTicker(ctx, r, size, 1*time.Second)
+//	    for p := range progressChan {
+//	    	fmt.Printf("\r%v remaining...", p.Remaining().Round(time.Second))
+//	    }
+//	    fmt.Println("\rdownload is completed")
+//	}()
+//
+//	// use the Reader as normal
+//	if _, err := io.Copy(dest, r); err != nil {
+//		log.Fatalln(err)
+//	}
 package progress
 
 import (
@@ -39,6 +40,14 @@ type Counter interface {
 	// Err gets the last error from the Reader or Writer.
 	// When the process is finished, this will be io.EOF.
 	Err() error
+}
+
+// TimedCounter extends Counter with timing information.
+// Both Reader and Writer implement TimedCounter.
+type TimedCounter interface {
+	Counter
+	// AverageDuration returns the average time taken per operation.
+	AverageDuration() time.Duration
 }
 
 // Progress represents a moment of progress.

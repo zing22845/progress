@@ -1,6 +1,6 @@
 # `progress` [![GoDoc](https://godoc.org/github.com/machinebox/progress?status.png)](http://godoc.org/github.com/machinebox/progress) [![Build Status](https://travis-ci.org/machinebox/progress.svg?branch=master)](https://travis-ci.org/machinebox/progress) [![Go Report Card](https://goreportcard.com/badge/github.com/machinebox/progress)](https://goreportcard.com/report/github.com/machinebox/progress)
 
-`io.Reader` and `io.Writer` with progress and remaining time estimation.
+`io.Reader` and `io.Writer` with progress, remaining time estimation, and operation timing.
 
 ## Usage
 
@@ -33,3 +33,33 @@ if _, err := io.Copy(dest, r); err != nil {
 1. Use `progress.NewTicker` to get a channel on which progress updates will be sent
 1. Start a Goroutine to periodically check the progress, and do something with it - like log it
 1. Use the readers and writers as normal
+
+## Operation Timing
+
+Both `Reader` and `Writer` now provide average duration metrics for read and write operations:
+
+```go
+// Get the average time taken per Read operation
+reader := progress.NewReader(r)
+// ... perform some reads ...
+avgReadTime := reader.AverageDuration()
+fmt.Printf("Average read time: %v\n", avgReadTime)
+
+// Get the average time taken per Write operation
+writer := progress.NewWriter(w)
+// ... perform some writes ...
+avgWriteTime := writer.AverageDuration()
+fmt.Printf("Average write time: %v\n", avgWriteTime)
+```
+
+The `TimedCounter` interface is implemented by both `Reader` and `Writer`:
+
+```go
+type TimedCounter interface {
+	Counter
+	// AverageDuration returns the average time taken per operation.
+	AverageDuration() time.Duration
+}
+```
+
+See the [timing example](example/timing/main.go) for more details on how to use this feature.

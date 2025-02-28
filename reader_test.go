@@ -5,6 +5,7 @@ import (
 	"io/ioutil"
 	"strings"
 	"testing"
+	"time"
 
 	"github.com/matryer/is"
 )
@@ -14,8 +15,9 @@ func TestNewReader(t *testing.T) {
 
 	// check Reader interfaces
 	var (
-		_ io.Reader = (*Reader)(nil)
-		_ Counter   = (*Reader)(nil)
+		_ io.Reader    = (*Reader)(nil)
+		_ Counter      = (*Reader)(nil)
+		_ TimedCounter = (*Reader)(nil)
 	)
 
 	s := `Now that's what I call progress`
@@ -38,4 +40,29 @@ func TestNewReader(t *testing.T) {
 	is.Equal(len(b), 29)       // len(b)
 	is.Equal(r.N(), int64(31)) // r.N()
 
+	// Test AverageDuration
+	avgDuration := r.AverageDuration()
+	is.True(avgDuration >= 0)          // Average duration should be non-negative
+	is.True(avgDuration < time.Second) // Average duration should be reasonable
+}
+
+// TestReaderAverageDuration tests the AverageDuration method specifically
+func TestReaderAverageDuration(t *testing.T) {
+	is := is.New(t)
+
+	// No reads performed yet
+	r := NewReader(strings.NewReader("test data"))
+	is.Equal(r.AverageDuration(), time.Duration(0))
+
+	// Perform a few reads
+	buf := make([]byte, 2)
+	for i := 0; i < 3; i++ {
+		_, err := r.Read(buf)
+		is.NoErr(err)
+	}
+
+	// Average duration should be non-zero after reads
+	avgDuration := r.AverageDuration()
+	is.True(avgDuration > 0)
+	is.True(avgDuration < time.Second) // Sanity check for reasonable duration
 }

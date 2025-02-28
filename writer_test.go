@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"io"
 	"testing"
+	"time"
 
 	"github.com/matryer/is"
 )
@@ -13,8 +14,9 @@ func TestNewWriter(t *testing.T) {
 
 	// check Writer interfaces
 	var (
-		_ io.Writer = (*Writer)(nil)
-		_ Counter   = (*Writer)(nil)
+		_ io.Writer    = (*Writer)(nil)
+		_ Counter      = (*Writer)(nil)
+		_ TimedCounter = (*Writer)(nil)
 	)
 
 	var buf bytes.Buffer
@@ -35,4 +37,30 @@ func TestNewWriter(t *testing.T) {
 	is.Equal(n, 3)            // n
 	is.Equal(w.N(), int64(5)) // r.N()
 
+	// Test AverageDuration
+	avgDuration := w.AverageDuration()
+	is.True(avgDuration >= 0)          // Average duration should be non-negative
+	is.True(avgDuration < time.Second) // Average duration should be reasonable
+}
+
+// TestAverageDuration tests the AverageDuration method specifically
+func TestWriterAverageDuration(t *testing.T) {
+	is := is.New(t)
+
+	var buf bytes.Buffer
+	w := NewWriter(&buf)
+
+	// Initial average should be 0 when no writes have been performed
+	is.Equal(w.AverageDuration(), time.Duration(0))
+
+	// Perform a few writes
+	for i := 0; i < 5; i++ {
+		_, err := w.Write([]byte("test"))
+		is.NoErr(err)
+	}
+
+	// Average duration should be non-zero after writes
+	avgDuration := w.AverageDuration()
+	is.True(avgDuration > 0)
+	is.True(avgDuration < time.Second) // Sanity check for reasonable duration
 }

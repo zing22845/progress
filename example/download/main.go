@@ -4,15 +4,14 @@ import (
 	"context"
 	"fmt"
 	"io"
-	"io/ioutil"
 	"log"
 	"net/http"
 	"os"
 	"strconv"
 	"time"
 
-	"github.com/machinebox/progress"
 	"github.com/pkg/errors"
+	"github.com/zing22845/progress"
 )
 
 func main() {
@@ -48,7 +47,7 @@ func run(args ...string) error {
 		}
 		fmt.Println("\rdownload is completed")
 	}()
-	if _, err := io.Copy(ioutil.Discard, r); err != nil {
+	if _, err := io.Copy(io.Discard, r); err != nil {
 		return errors.Wrap(err, "failed to read body")
 	}
 	return nil
