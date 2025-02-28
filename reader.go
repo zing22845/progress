@@ -88,7 +88,7 @@ func (r *Reader) AverageOperationDuration() time.Duration {
 
 // Stats returns both the total duration and the number of bytes read.
 // This allows retrieving both values atomically with a single lock acquisition.
-func (r *Reader) Stats() (time.Duration, int64, int64) {
+func (r *Reader) Stats() (totalDuration time.Duration, totalCount int64, totalBytes int64) {
 	r.lock.RLock()
 	defer r.lock.RUnlock()
 

@@ -88,7 +88,7 @@ func (w *Writer) AverageOperationDuration() time.Duration {
 
 // Stats returns both the total duration and the number of bytes written.
 // This allows retrieving both values atomically with a single lock acquisition.
-func (w *Writer) Stats() (time.Duration, int64, int64) {
+func (w *Writer) Stats() (totalDuration time.Duration, totalCount int64, totalBytes int64) {
 	w.lock.RLock()
 	defer w.lock.RUnlock()
 
